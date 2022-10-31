@@ -46,8 +46,8 @@ def train_epoch(epoch, net, train_loader, val_loader , criterion, optimizer, sch
         train_loss.update(loss.item(), inputs.size(0))
         train_acc1.update(acc1.item(), inputs.size(0))
         train_acc5.update(acc5.item(), inputs.size(0))
-        if it % args.print_freq == 0:
-            progress_train.display(it)
+        # if it % args.print_freq == 0:
+        #     progress_train.display(it)
 
         # Backward and optimize
         optimizer.zero_grad()
@@ -126,8 +126,8 @@ if __name__ == "__main__":
                 help = 'Learning rate (default: 6e-5)')
     parser.add_argument('--weight-decay', type = float, default = 5e-5, metavar = 'WD',
                 help = 'Weight decay (default: 1e-5)')
-    parser.add_argument('-p', '--print-freq', default = 10, type = int,
-                        metavar='N', help='print frequency (default: 10)')
+    # parser.add_argument('-p', '--print-freq', default = 10, type = int,
+    #                     metavar='N', help='print frequency (default: 10)')
     args = parser.parse_args()
 
     # autotune cudnn kernel choice
@@ -140,8 +140,9 @@ if __name__ == "__main__":
 
     # Set device
     # os.environ["CUDA_VISIBLE_DEVICES"] = str(args.gpu_device)
-    os.environ["CUDA_VISIBLE_DEVICES"] = '1,2'
+    # os.environ["CUDA_VISIBLE_DEVICES"] = '1,2'
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(device)
 
     # Data loading
     traindir = os.path.join(args.data, 'train')
