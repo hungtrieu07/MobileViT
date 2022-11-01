@@ -4,6 +4,7 @@ import shutil
 import utils
 
 import torch
+import torchvision
 import torch.nn as nn
 from torchvision import transforms as T
 import torchvision.datasets as datasets
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = "Train classification of CMT model")
     parser.add_argument('--data', metavar = 'DIR', default = '../imagenet_data',
                 help = 'path to dataset')
-    parser.add_argument("--gpu_device", type = int, default = 2,
+    parser.add_argument("--gpu_device", type = int, default = 0,
                 help = "Select specific GPU to run the model")
     parser.add_argument('--batch-size', type = int, default = 256, metavar = 'N',
                 help = 'Input batch size for training (default: 64)')
@@ -148,27 +149,31 @@ if __name__ == "__main__":
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
     normalize = T.Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
-
-    train_dataset = datasets.ImageFolder(
-        traindir,
-        T.Compose([
+    
+    train_transform = T.Compose([
             T.RandomResizedCrop(256),
             T.RandomHorizontalFlip(),
             T.ToTensor(),
             normalize,
-    ]))
-    val_dataset = datasets.ImageFolder(
-        valdir,
-        T.Compose([
+    ])
+    
+    val_transform = T.Compose([
             T.Resize(256),
             T.ToTensor(),
             normalize,
-    ]))
+    ])
 
+    train_dataset = torchvision.datasets.CIFAR10(root='./data', train=True,
+                                        download=True, transform=train_transform)
+    
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size = args.batch_size, shuffle = True,
         num_workers = 4,  pin_memory = True
     )
+
+    val_dataset = torchvision.datasets.CIFAR10(root='./data', train=False,
+                                       download=True, transform=val_transform)
+
     val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size = args.batch_size, shuffle = False,
         num_workers = 4, pin_memory = True
@@ -176,12 +181,12 @@ if __name__ == "__main__":
 
     # Create model
     net = models.MobileViT_S()
-    # net.to(device)
-    net = torch.nn.DataParallel(net).to(device)
+    net.to(device)
+    # net = torch.nn.DataParallel(net).to(device)
 
     # Set loss function and optimizer
-    # criterion = nn.CrossEntropyLoss()
-    criterion = nn.CrossEntropyLoss().to(device)
+    criterion = nn.CrossEntropyLoss()
+    # criterion = nn.CrossEntropyLoss().to(device)
     optimizer = torch.optim.SGD(net.parameters(), args.lr,
                                 momentum = 0.9,
                                 weight_decay = args.weight_decay)
