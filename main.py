@@ -89,8 +89,8 @@ def train_epoch(epoch, net, train_loader, val_loader , criterion, optimizer, sch
         val_acc5.update(acc5.item(), inputs.size(0))
         acc1 = val_acc1.avg
 
-        if it % args.print_freq == 0:
-            progress_val.display(it)
+        # if it % args.print_freq == 0:
+        #     progress_val.display(it)
 
         # Log on Wandb
         wandb.log({
